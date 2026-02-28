@@ -2,9 +2,9 @@ import asyncio
 import random
 import time
 import requests
+import threading
 from telethon import TelegramClient, events
 from flask import Flask
-import threading
 
 # --- CONFIG ---
 API_ID = 36767235
@@ -16,7 +16,7 @@ GIPHY_API_KEY = "YLLksuIyKHZcaMKuAOYR1s27dz2uy8Xr"
 # --- LISTES ---
 blacklist = {OWNER_ID}  # seuls les utilisateurs dans la blacklist peuvent utiliser les commandes
 owners = {OWNER_ID}
-cooldowns = {}
+cooldowns = {}  # cooldown 5s par utilisateur
 
 # --- TELETHON ---
 client = TelegramClient('bot_hentai', API_ID, API_HASH)
@@ -29,7 +29,7 @@ def home():
     return "Bot hentai/slap/kiss en ligne !"
 
 def run_flask():
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, threaded=True)
 
 threading.Thread(target=run_flask).start()
 
@@ -120,6 +120,17 @@ hentai_gifs = [
 ]
 
 # --- COMMANDES ---
+@client.on(events.NewMessage(pattern=r'\.start'))
+async def start(event):
+    if not check_blacklist(event.sender_id):
+        return
+    await event.reply(
+        "👋 Salut ! Commandes disponibles pour toi :\n"
+        ".hentai\n"
+        ".slap @user\n"
+        ".kiss @user"
+    )
+
 @client.on(events.NewMessage(pattern=r'\.hentai'))
 async def hentai(event):
     if not check_blacklist(event.sender_id):
@@ -134,23 +145,36 @@ async def hentai(event):
     await asyncio.sleep(6)
     await msg.delete()
 
-@client.on(events.NewMessage(pattern=r'\.(slap|kiss) @(\w+)'))
-async def giphy_action(event):
+@client.on(events.NewMessage(pattern=r'\.slap @(\w+)'))
+async def slap(event):
     if not check_blacklist(event.sender_id):
         return
-    action, username = event.pattern_match.group(1), event.pattern_match.group(2)
+    username = event.pattern_match.group(1)
     remaining = get_cooldown_remaining(event.sender_id)
     if remaining > 0:
         await event.reply(f"😡 Calme-toi un peu, c’est pas le bot à ta mère ! Attends {remaining}s")
         return
-    gif = get_giphy_gif(action)
-    await event.reply(f"@{username} {action}!\n{gif}")
+    gif = get_giphy_gif("slap")
+    await event.reply(f"👊 {event.sender.first_name} tape @{username} !\n{gif}")
     update_cooldown(event.sender_id)
 
-# Blacklist commands
+@client.on(events.NewMessage(pattern=r'\.kiss @(\w+)'))
+async def kiss(event):
+    if not check_blacklist(event.sender_id):
+        return
+    username = event.pattern_match.group(1)
+    remaining = get_cooldown_remaining(event.sender_id)
+    if remaining > 0:
+        await event.reply(f"😡 Calme-toi un peu, c’est pas le bot à ta mère ! Attends {remaining}s")
+        return
+    gif = get_giphy_gif("kiss")
+    await event.reply(f"💋 {event.sender.first_name} embrasse @{username} !\n{gif}")
+    update_cooldown(event.sender_id)
+
+# --- BLACKLIST ---
 @client.on(events.NewMessage(pattern=r'\.bl @(\w+)'))
-async def add_blacklist(event):
-    if event.sender_id != OWNER_ID:
+async def bl(event):
+    if not check_owner(event.sender_id):
         return
     username = event.pattern_match.group(1)
     user = await client.get_entity(username)
@@ -158,8 +182,8 @@ async def add_blacklist(event):
     await event.reply(f"✅ @{username} ajouté à la blacklist")
 
 @client.on(events.NewMessage(pattern=r'\.unbl @(\w+)'))
-async def remove_blacklist(event):
-    if event.sender_id != OWNER_ID:
+async def unbl(event):
+    if not check_owner(event.sender_id):
         return
     username = event.pattern_match.group(1)
     user = await client.get_entity(username)
@@ -167,10 +191,10 @@ async def remove_blacklist(event):
     await event.reply(f"❌ @{username} retiré de la blacklist")
 
 @client.on(events.NewMessage(pattern=r'\.blacklist'))
-async def show_blacklist(event):
-    if event.sender_id != OWNER_ID:
+async def blacklist_list(event):
+    if not check_owner(event.sender_id):
         return
-    msg = "Blacklist :\n"
+    msg = "👤 Blacklist :\n"
     for uid in blacklist:
         user = await client.get_entity(uid)
         msg += f"- @{user.username} ({user.first_name})\n"
@@ -182,4 +206,4 @@ async def main():
     print("Bot hentai/slap/kiss démarré…")
     await client.run_until_disconnected()
 
-asyncio.run(main())
+asyncio.get_event_loop().run_until_complete(main())
