@@ -5,17 +5,16 @@ import requests
 from telethon import TelegramClient, events
 from flask import Flask
 import threading
-import os
 
 # --- CONFIG ---
-API_ID = int(os.environ.get("API_ID", 36767235))
-API_HASH = os.environ.get("API_HASH", "6a36bf6c4b15e7eecdb20885a13fc2d7")
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8791927496:AAEdPeuCO99MgBrh-TLiJ7Q7gAkcFGEGjIU")
-GIPHY_API_KEY = os.environ.get("GIPHY_API_KEY", "YLLksuIyKHZcaMKuAOYR1s27dz2uy8Xr")
-OWNER_ID = int(os.environ.get("OWNER_ID", 7844678082))
+API_ID = 36767235
+API_HASH = "6a36bf6c4b15e7eecdb20885a13fc2d7"
+BOT_TOKEN = "8791927496:AAEdPeuCO99MgBrh-TLiJ7Q7gAkcFGEGjIU"
+OWNER_ID = 7844678082
+GIPHY_API_KEY = "YLLksuIyKHZcaMKuAOYR1s27dz2uy8Xr"
 
 # --- LISTES ---
-blacklist = {OWNER_ID}  # seuls les utilisateurs de la blacklist peuvent utiliser les commandes
+blacklist = {OWNER_ID}  # seuls les utilisateurs dans la blacklist peuvent utiliser les commandes
 owners = {OWNER_ID}
 cooldowns = {}
 
@@ -34,12 +33,12 @@ def run_flask():
 
 threading.Thread(target=run_flask).start()
 
-# --- FONCTIONS ---
+# --- FONCTIONS UTILES ---
 def check_blacklist(user_id):
     return user_id in blacklist
 
-def is_on_cooldown(user_id):
-    return user_id in cooldowns and time.time() - cooldowns[user_id] < 5
+def check_owner(user_id):
+    return user_id in owners
 
 def get_cooldown_remaining(user_id):
     if user_id not in cooldowns:
@@ -59,46 +58,6 @@ def get_giphy_gif(tag):
 hentai_gifs = [
 "https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd459eaf877.gif",
 "https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd459f14394.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd459f6d267.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd459fc75eb.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a02bca8.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a084d62.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a0ddb2f.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a1423d8.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a19b1cb.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a1f3e10.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a258610.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a2b141b.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a3168ea.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a36f3fd.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a3c845d.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a42b35a.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a484425.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a4dcad1.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a5415e3.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a598901.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a5f1ec8.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a656046.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a6af1aa.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a712990.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a769d40.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a7c1a1c.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a825a91.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a87d47b.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a938976.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a9903a5.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45a9e8c1f.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45aa4d0de.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45aaa711e.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45ab0b8ee.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45ab635cf.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45abbc4c0.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45ac20f25.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45ac786a5.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45acd0644.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45ad346c7.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45ad8c3fd.gif",
-"https://s2.pictoa.com/media/galleries/296/760/2967605ffd459cac8ec/38322265ffd45ade45d4.gif",
 "https://www.cougarillo.com/wp-content/uploads/2023/12/porno-hentai.gif",
 "https://www.cougarillo.com/wp-content/uploads/2023/12/levrette-gif-hentai.gif",
 "https://www.cougarillo.com/wp-content/uploads/2023/12/gif-hentai-gros-seins.gif",
@@ -157,7 +116,7 @@ hentai_gifs = [
 "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-1.gif"
 ]
 
-# --- COMMANDES ---
+# --- COMMANDES HENTAI/KISS/SLAP ---
 @client.on(events.NewMessage(pattern=r'\.hentai'))
 async def hentai(event):
     if not check_blacklist(event.sender_id):
@@ -166,25 +125,56 @@ async def hentai(event):
     if remaining > 0:
         await event.reply(f"😡 Calme-toi un peu, c’est pas le bot à ta mère ! Attends {remaining}s")
         return
-    gif = random.choice(hentai_gifs)
-    msg = await event.reply(gif)
+    gif_url = random.choice(hentai_gifs)
+    msg = await event.reply(file=gif_url)
     update_cooldown(event.sender_id)
     await asyncio.sleep(6)
     await msg.delete()
 
 @client.on(events.NewMessage(pattern=r'\.(kiss|slap) @(\w+)'))
-async def giphy_action(event):
+async def kiss_slap(event):
     if not check_blacklist(event.sender_id):
         return
+    action = event.pattern_match.group(1)
+    username = event.pattern_match.group(2)
     remaining = get_cooldown_remaining(event.sender_id)
     if remaining > 0:
         await event.reply(f"😡 Calme-toi un peu, c’est pas le bot à ta mère ! Attends {remaining}s")
         return
-    action = event.pattern_match.group(1)
-    username = event.pattern_match.group(2)
     gif_url = get_giphy_gif(action)
-    await event.reply(f"@{username} {action} !\n{gif_url}")
+    await event.reply(file=gif_url)
     update_cooldown(event.sender_id)
+
+# --- COMMANDES BLACKLIST ---
+@client.on(events.NewMessage(pattern=r'\.bl @(\w+)'))
+async def add_blacklist(event):
+    if event.sender_id not in owners:
+        return
+    username = event.pattern_match.group(1)
+    user = await client.get_entity(username)
+    blacklist.add(user.id)
+    await event.reply(f"✅ @{username} ajouté à la blacklist")
+
+@client.on(events.NewMessage(pattern=r'\.unbl @(\w+)'))
+async def remove_blacklist(event):
+    if event.sender_id not in owners:
+        return
+    username = event.pattern_match.group(1)
+    user = await client.get_entity(username)
+    blacklist.discard(user.id)
+    await event.reply(f"❌ @{username} retiré de la blacklist")
+
+@client.on(events.NewMessage(pattern=r'\.blacklist'))
+async def show_blacklist(event):
+    if event.sender_id not in owners:
+        return
+    msg = "Blacklist :\n"
+    for uid in blacklist:
+        if uid in owners:
+            continue
+        user = await client.get_entity(uid)
+        msg += f"- @{user.username} ({user.first_name})\n"
+    await event.reply(msg)
 
 # --- RUN BOT ---
 async def main():
