@@ -1,2 +1,3 @@
-telethon
-Flask
+telethon==1.27.0
+Flask==2.3.3
+requests==2.31.0
