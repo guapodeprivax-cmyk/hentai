@@ -2,9 +2,9 @@ import asyncio
 import random
 import time
 import requests
-import threading
 from telethon import TelegramClient, events
 from flask import Flask
+import threading
 
 # --- CONFIG ---
 API_ID = 36767235
@@ -14,7 +14,7 @@ OWNER_ID = 7844678082
 GIPHY_API_KEY = "YLLksuIyKHZcaMKuAOYR1s27dz2uy8Xr"
 
 # --- LISTES ---
-blacklist = {OWNER_ID}
+blacklist = {OWNER_ID}  # seuls les utilisateurs dans la blacklist peuvent utiliser les commandes
 owners = {OWNER_ID}
 cooldowns = {}
 
@@ -80,46 +80,76 @@ hentai_gifs = [
     "https://www.cougarillo.com/wp-content/uploads/2024/04/gif-hentai115.gif",
     "https://www.cougarillo.com/wp-content/uploads/2024/04/gif-hentai142.gif",
     "https://img2.gelbooru.com//images/40/5f/405f442f0a5b6631821708238aed7d9a.gif",
-    # ajoute ici tous les autres liens hentai que tu m’as donnés
+    "https://img2.gelbooru.com//images/32/44/324418be5fba84ca057ce3601b944292.gif",
+    "https://img2.gelbooru.com//images/70/09/7009626c5baad944ab31565e9509109a.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-41.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-40.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-39.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-38.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-37.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-36.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-35.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-34.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-32.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-30.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-29.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-28.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-27.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-25.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-24.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-23.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-22.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-21.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-20.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-19.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-18.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-17.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-16.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-15.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-14.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-13.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-12.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-11.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-10.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-9.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-7.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-6.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-5.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-4.gif",
+    "https://commentseduire.net/wp-content/uploads/2017/06/hentai-gif-1.gif"
 ]
 
 # --- COMMANDES ---
 @client.on(events.NewMessage(pattern=r'\.hentai'))
 async def hentai(event):
-    user_id = event.sender_id
-    if not check_blacklist(user_id):
+    if not check_blacklist(event.sender_id):
         return
-    remaining = get_cooldown_remaining(user_id)
+    remaining = get_cooldown_remaining(event.sender_id)
     if remaining > 0:
         await event.reply(f"😡 Calme-toi un peu, c’est pas le bot à ta mère ! Attends {remaining}s")
         return
     gif = random.choice(hentai_gifs)
-    msg = await event.reply(file=gif)
-    update_cooldown(user_id)
+    msg = await event.reply(gif)
+    update_cooldown(event.sender_id)
     await asyncio.sleep(6)
     await msg.delete()
 
 @client.on(events.NewMessage(pattern=r'\.(slap|kiss) @(\w+)'))
-async def slap_kiss(event):
-    user_id = event.sender_id
-    if not check_blacklist(user_id):
+async def giphy_action(event):
+    if not check_blacklist(event.sender_id):
         return
-    remaining = get_cooldown_remaining(user_id)
+    action, username = event.pattern_match.group(1), event.pattern_match.group(2)
+    remaining = get_cooldown_remaining(event.sender_id)
     if remaining > 0:
         await event.reply(f"😡 Calme-toi un peu, c’est pas le bot à ta mère ! Attends {remaining}s")
         return
-    action = event.pattern_match.group(1)
-    username = event.pattern_match.group(2)
-    await event.reply(f"{action.upper()} pour @{username} !")
-    update_cooldown(user_id)
+    gif = get_giphy_gif(action)
+    await event.reply(f"@{username} {action}!\n{gif}")
+    update_cooldown(event.sender_id)
 
-@client.on(events.NewMessage(pattern=r'\.(slap|kiss)$'))
-async def slap_kiss_fail(event):
-    await event.reply("❌ Mentionne quelqu’un ! Utilise .slap @user ou .kiss @user")
-
-# --- BLACKLIST ---
+# Blacklist commands
 @client.on(events.NewMessage(pattern=r'\.bl @(\w+)'))
-async def add_bl(event):
+async def add_blacklist(event):
     if event.sender_id != OWNER_ID:
         return
     username = event.pattern_match.group(1)
@@ -128,7 +158,7 @@ async def add_bl(event):
     await event.reply(f"✅ @{username} ajouté à la blacklist")
 
 @client.on(events.NewMessage(pattern=r'\.unbl @(\w+)'))
-async def remove_bl(event):
+async def remove_blacklist(event):
     if event.sender_id != OWNER_ID:
         return
     username = event.pattern_match.group(1)
@@ -137,7 +167,9 @@ async def remove_bl(event):
     await event.reply(f"❌ @{username} retiré de la blacklist")
 
 @client.on(events.NewMessage(pattern=r'\.blacklist'))
-async def show_bl(event):
+async def show_blacklist(event):
+    if event.sender_id != OWNER_ID:
+        return
     msg = "Blacklist :\n"
     for uid in blacklist:
         user = await client.get_entity(uid)
